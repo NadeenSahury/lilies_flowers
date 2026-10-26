@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>باقة ليليز</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#171438;--bg2:#3b2d66;--ink:#fdf2f8;--btn:rgba(255,255,255,.16);
+ color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(110% 80% at 50% 105%,var(--bg2),var(--bg1));color:var(--ink);
+ font-family:'Cairo',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+svg{flex:1;min-height:0;width:100%;max-width:520px;cursor:pointer}
+button{font:inherit;font-size:1rem;background:var(--btn);color:var(--ink);border:1px solid rgba(255,255,255,.4);
+ border-radius:999px;padding:.55rem 1.6rem;margin:0 0 1.2rem;cursor:pointer;backdrop-filter:blur(6px)}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.halo{transform-origin:200px 240px;animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.08);opacity:.8}}
+.stem{stroke:#b9f0d2;stroke-opacity:.75;stroke-width:4;fill:none;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;
+ animation:grow 1.8s cubic-bezier(.3,.6,.2,1) both}
+@keyframes grow{to{stroke-dashoffset:0}}
+.rise{animation:rise 1.9s cubic-bezier(.2,.8,.25,1) both}
+@keyframes rise{from{transform:scale(.15);opacity:0}to{transform:scale(1);opacity:1}}
+.pt{animation:rise 1.6s cubic-bezier(.25,.8,.3,1) both}
+.sway{animation:sway 7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+.sp{animation:float var(--t) linear var(--d) infinite;opacity:0}
+@keyframes float{0%{transform:translateY(0);opacity:0}20%{opacity:.9}100%{transform:translateY(-300px);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<svg id="s" viewBox="0 0 400 600" preserveAspectRatio="xMidYMax meet" role="img" aria-label="باقة ليليز شفافة تنمو من نقطة واحدة">
+<defs>
+ <radialGradient id="hg"><stop offset="0" stop-color="#ffc9e6" stop-opacity=".5"/><stop offset=".6" stop-color="#b49cff" stop-opacity=".16"/><stop offset="1" stop-color="#b49cff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="pg" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#ffb3d6" stop-opacity=".85"/><stop offset=".45" stop-color="#ffffff" stop-opacity=".5"/><stop offset="1" stop-color="#dcd0ff" stop-opacity=".18"/>
+ </linearGradient>
+ <linearGradient id="pg2" x1="0" y1="1" x2="0" y2="0">
+  <stop offset="0" stop-color="#ffc9e2" stop-opacity=".7"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".38"/><stop offset="1" stop-color="#e6dcff" stop-opacity=".12"/>
+ </linearGradient>
+ <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+  <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+ </filter>
+</defs>
+<circle class="halo" cx="200" cy="240" r="230" fill="url(#hg)"/>
+<g id="sparks"></g>
+<g id="scene" class="sway" style="transform-origin:200px 560px"></g>
+</svg>
+<button id="again" type="button">ازرعها من جديد</button>
+<script>
+var O={x:200,y:560};
+var FL=[
+ {x:200,y:100,s:1.0,d:1.0,r:0},{x:148,y:168,s:.95,d:.6,r:-14},{x:254,y:160,s:.95,d:.7,r:14},
+ {x:108,y:248,s:.85,d:.3,r:-26},{x:294,y:242,s:.85,d:.4,r:26},
+ {x:182,y:238,s:.8,d:.85,r:-6},{x:226,y:268,s:.74,d:.5,r:8}
+];
+var BUDS=[{x:122,y:122,r:-24,d:.45},{x:280,y:112,r:22,d:.55},{x:200,y:330,r:0,d:.2}];
+function petal(a,L,W,fill,delay){
+ var d='M0,0 C'+(-W)+','+(-L*.3)+' '+(-W*.9)+','+(-L*.78)+' 0,'+(-L)+' C'+(W*.9)+','+(-L*.78)+' '+W+','+(-L*.3)+' 0,0Z';
+ return '<g transform="rotate('+a+')"><g class="pt" style="animation-delay:'+delay+'s">'+
+  '<path d="'+d+'" fill="url(#'+fill+')" stroke="#fff" stroke-opacity=".65" stroke-width=".8"/>'+
+  '<path d="M0,-6 L0,-'+(L*.75)+'" stroke="#ff9ccb" stroke-opacity=".55" stroke-width="1.4" fill="none"/>'+
+  '<circle cx="-3" cy="-13" r="1.3" fill="#ff8cc0" opacity=".7"/><circle cx="4" cy="-19" r="1.2" fill="#ff8cc0" opacity=".7"/></g></g>';
+}
+function lily(f,t0){
+ var h='<g transform="translate('+f.x+','+f.y+') rotate('+f.r+') scale('+f.s+')"><g class="rise" style="animation-delay:'+t0+'s"><g transform="scale(1,.72)">';
+ [60,180,300].forEach(function(a,i){h+=petal(a,56,19,'pg2',t0+.1+i*.1)});
+ [0,120,240].forEach(function(a,i){h+=petal(a,66,23,'pg',t0+i*.1)});
+ for(var i=0;i<6;i++){
+  var a=(i-2.5)*22*Math.PI/180,x=Math.sin(a)*34,y=-Math.cos(a)*34;
+  h+='<path d="M0,0 Q'+(x*.3)+','+(y*.5)+' '+x+','+y+'" stroke="#fff6d6" stroke-opacity=".8" stroke-width="1.4" fill="none"/>'+
+     '<ellipse cx="'+x+'" cy="'+y+'" rx="2.4" ry="5" fill="#ffe3a0" transform="rotate('+(a*180/Math.PI)+' '+x+' '+y+')"/>';
+ }
+ return h+'<circle r="4" fill="#e9ffd0" opacity=".85"/></g></g></g>';
+}
+function bud(b,t0){
+ return '<g transform="translate('+b.x+','+b.y+') rotate('+b.r+')"><g class="rise" style="animation-delay:'+t0+'s;transform-origin:0 0">'+
+  '<path d="M0,0 C-13,-12 -11,-34 0,-52 C11,-34 13,-12 0,0Z" fill="url(#pg)" stroke="#fff" stroke-opacity=".6" stroke-width=".8"/>'+
+  '<path d="M0,-4 C-3,-18 -2,-34 0,-48" stroke="#ff9ccb" stroke-opacity=".5" fill="none"/></g></g>';
+}
+function stem(f,leafA){
+ var cx=O.x+(f.x-O.x)*.08, cy=O.y-(O.y-f.y)*.55, t=.4;
+ var px=(1-t)*(1-t)*O.x+2*(1-t)*t*cx+t*t*f.x, py=(1-t)*(1-t)*O.y+2*(1-t)*t*cy+t*t*f.y;
+ var side=f.x<O.x?-1:1, s='';
+ s+='<path class="stem" pathLength="1" style="animation-delay:'+f.d+'s" d="M'+O.x+','+O.y+' Q'+cx+','+cy+' '+f.x+','+f.y+'"/>';
+ if(leafA){
+  s+='<g transform="translate('+px+','+py+') rotate('+(side*50)+')"><path class="rise" style="animation-delay:'+(f.d+.9)+'s" fill="#b9f0d2" fill-opacity=".45" stroke="#d8ffe8" stroke-opacity=".6" stroke-width=".8" d="M0,0 C9,-14 9,-40 0,-64 C-9,-40 -9,-14 0,0Z"/></g>';
+ }
+ return s;
+}
+function build(){
+ var h='';
+ FL.forEach(function(f,i){h+=stem(f,i%2===0)});
+ BUDS.forEach(function(b){h+=stem({x:b.x,y:b.y,d:b.d},false)});
+ h+='<g filter="url(#glow)">';
+ BUDS.forEach(function(b){h+=bud(b,b.d+1.2)});
+ FL.forEach(function(f){h+=lily(f,f.d+1.3)});
+ h+='</g>';
+ h+='<g class="rise" style="animation-delay:2.4s;transform-origin:200px 470px"><path d="M200,470 C160,445 140,470 168,486 Z M200,470 C240,445 260,470 232,486 Z" fill="#ffc9e6" fill-opacity=".55" stroke="#fff" stroke-opacity=".6" stroke-width=".8"/><ellipse cx="200" cy="472" rx="12" ry="9" fill="#ffd9ee" fill-opacity=".8"/></g>';
+ h+='<circle cx="'+O.x+'" cy="'+O.y+'" r="5" fill="#fff4c4" filter="url(#glow)"/>';
+ document.getElementById('scene').innerHTML=h;
+}
+function sparks(){
+ var h='';
+ for(var i=0;i<16;i++){
+  var x=40+Math.random()*320,y=260+Math.random()*320,r=1+Math.random()*2;
+  h+='<circle class="sp" cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="'+r.toFixed(1)+'" fill="#fff" style="--t:'+(7+Math.random()*6).toFixed(1)+'s;--d:'+(Math.random()*8).toFixed(1)+'s"/>';
+ }
+ document.getElementById('sparks').innerHTML=h;
+}
+build();sparks();
+document.getElementById('again').onclick=build;
+document.getElementById('s').onclick=build;
+</script>
+</body>
+</html>
